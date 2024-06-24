@@ -1,0 +1,13 @@
+.container {
+    display: flex;
+}
+#map {
+    border: 1px solid #888;
+}
+.toggle-container {
+    padding-left: 20px;
+}
+.toggle-container label {
+    display: block;
+    margin-bottom: 5px;
+}
