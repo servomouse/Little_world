@@ -24,8 +24,12 @@ async def relay(websocket, path):
                 if len(connected_clients) == 2:
                     for client in connected_clients:
                         if client != websocket:
+                            print(f"MYLOG: Resending data: {message}")
                             await client.send(message)
+                else:
+                    print(f"MYLOG: Data received, but there is no connection to resend: {len(connected_clients)}, {message}")
         finally:
+            print("Removing client")
             connected_clients.remove(websocket)
     else:
         print(f"Illegal attempt to connect 3rd client")

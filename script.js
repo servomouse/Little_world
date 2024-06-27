@@ -43,6 +43,7 @@ ws.onopen = function() {
 };
 
 ws.onmessage = function(event) {
+    console.log(`Received data ${event.data}`);
     const updates = JSON.parse(event.data);
     updates.forEach(([x, y, color]) => {setCellColor(x, y, color);});
 };
@@ -59,13 +60,14 @@ console.log(`WebSocket server is running on ws://localhost:${ws_port}`);
 
 createWorld(field_height, field_width);
 setCellColor(0, 4, '#FF0000');
-setInterval(red_random_cell, 1000);
+// setInterval(red_random_cell, 1000);
 
 const toggles = document.querySelectorAll('input[type="radio"][name="toggle"]');
     toggles.forEach(toggle => {
         toggle.addEventListener('change', function() {
             if(this.checked) {
                 // Send the name of the toggle to the WebSocket server
+                console.log(`Toggle ${this.value} is enabled`);
                 ws.send(`Toggle ${this.value} is enabled`);
         }
     });
