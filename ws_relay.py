@@ -13,31 +13,34 @@ def import_data(file_path):
         ws_port = data["port"]
 
 
-connected_clients = set()
+connected = set()
 
 async def relay(websocket, path):
-    if len(connected_clients) < 2:
-        connected_clients.add(websocket)
-        print(f"Connected client #{len(connected_clients)}")
-        try:
-            async for message in websocket:
-                if len(connected_clients) == 2:
-                    for client in connected_clients:
-                        if client != websocket:
-                            print(f"MYLOG: Resending data: {message}")
-                            await client.send(message)
-                else:
-                    print(f"MYLOG: Data received, but there is no connection to resend: {len(connected_clients)}, {message}")
-        finally:
-            print("Removing client")
-            connected_clients.remove(websocket)
-    else:
-        print(f"Illegal attempt to connect 3rd client")
-        await websocket.close()
+    # Register.
+    connected.add(websocket)
+    try:
+        # Wait for exactly two clients to connect.
+        while len(connected) < 2:
+            await asyncio.sleep(0.1)  # Sleep briefly to avoid busy waiting.
+
+        # Relay messages between the two clients.
+        while True:
+            message = await websocket.recv()
+            for conn in connected:
+                if conn != websocket:
+                    await conn.send(message)
+    except websockets.exceptions.ConnectionClosed:
+        print("A client just disconnected")
+    finally:
+        # Unregister.
+        print("A client just unregistered")
+        connected.remove(websocket)
 
 
-import_data('variables.js')
-start_server = websockets.serve(relay, "localhost", ws_port)
+async def main():
+    async with websockets.serve(relay, "localhost", ws_port):
+        print(f"Server started on ws://localhost:{ws_port}")
+        await asyncio.Future()  # Run forever
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+if __name__ == "__main__":
+    asyncio.run(main())
