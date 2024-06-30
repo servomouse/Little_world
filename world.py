@@ -17,9 +17,8 @@ def import_data(file_path):
 
 
 async def on_message(websocket):
-    print("Message received: ", end='')
     async for message in websocket:
-        print(f"{message}")
+        print(f"Message received: {message}")
 
 
 async def send_data(websocket, data):
@@ -67,19 +66,8 @@ async def hello():
     h_center = int(height/2)
     uri = f"ws://127.0.0.1:{port}"
     async with websockets.connect(uri) as websocket:
+        receive_task = asyncio.create_task(on_message(websocket))
         print(f"MYLOG: Connected to {uri}")
-        distance = 100
-        # while True:
-        # cells_data = []
-        # for _ in range(10):
-        #     x_min = 0 - distance
-        #     x_max = distance
-        #     x = random.randint(x_min, x_max)
-        #     y_max = int(sqrt((distance * distance) - (x*x)))
-        #     y_min = 0 - y_max
-        #     y = random.randint(y_min, y_max)
-        #     color = "#{:06x}".format(random.randint(0, 0x005500))
-        #     cells_data.append([w_center+x, h_center+y, color])
         pov = [3, 0, 0]
         screen = [2, 0, 0]
 
@@ -120,5 +108,6 @@ async def hello():
 
             # greeting = await websocket.recv()
             # print(f"Received data: {greeting}")
+        await receive_task
 
 asyncio.get_event_loop().run_until_complete(hello())
