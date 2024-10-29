@@ -7,7 +7,7 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
-// renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 
 // OrbitControls
@@ -23,34 +23,19 @@ const ellipseCurve = new THREE.EllipseCurve(
     0                // aRotation
 );
 
-const light = new THREE.DirectionalLight(0xffffff, 1);
+const light = new THREE.PointLight(0xffffff, 1)
 light.position.set(5, 5, 5).normalize();
 light.castShadow = true;
-light.shadow.bias = -0.0001;
-scene.add(light);
+light.shadow.bias = -0.0005;
+scene.add(light)
+
+const ambientLight = new THREE.AmbientLight(0xc0c0ff, 0.03);
+scene.add(ambientLight)
 
 const sphereGeometry = new THREE.SphereGeometry(0.2, 32, 32);
 const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, emissive: 0xffffff });
 const lightSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 scene.add(lightSphere);
-
-// const toplight = new THREE.DirectionalLight(0xffffff, 0.2);
-// toplight.position.set(-50, 100, -50).normalize();
-// toplight.castShadow = true;
-// scene.add(toplight);
-
-// const botlight = new THREE.DirectionalLight(0xffffff, 0.2);
-// botlight.position.set(-50, -100, -50).normalize();
-// botlight.castShadow = true;
-// scene.add(botlight);
-
-// Cube
-// const cubeGeometry = new THREE.BoxGeometry();
-// const cubeMaterial = new THREE.MeshStandardMaterial({ color: 0x0077ff });
-// const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-// cube.castShadow = true;
-// cube.receiveShadow = true;
-// scene.add(cube);
 
 // Torus
 const textureLoader = new THREE.TextureLoader();
@@ -60,13 +45,13 @@ img.src = 'Earth_map.jpg';
 img.onload = function() {
     const { img_top, img_bottom } = cutImageInHalves(img);
     const torusTexture = glueImgHalves(img_top, img_bottom);
-    const textureLoader = new THREE.TextureLoader();
+    // const textureLoader = new THREE.TextureLoader();
     textureLoader.load(torusTexture, function(torusTexture) {
         const geometry = new THREE.TorusGeometry(10, 3, 16, 100);
-        const material = new THREE.MeshStandardMaterial({ map: torusTexture, side: THREE.DoubleSide });
+        const material = new THREE.MeshStandardMaterial({ map: torusTexture });
         torus = new THREE.Mesh(geometry, material);
-        torus.castShadow = false;
-        torus.receiveShadow = false;
+        torus.castShadow = true;
+        torus.receiveShadow = true;
         torus.rotation.x = -Math.PI / 2;
         scene.add(torus);
     });
@@ -75,15 +60,11 @@ img.onload = function() {
 const axesHelper = new THREE.AxesHelper( 5 );
 scene.add( axesHelper );
 
-// const texture = textureLoader.load('Earth_map.jpg');
-
-// const torusGeometry = new THREE.TorusGeometry(10, 3, 16, 100);
-// torusGeometry.center = (0.5, 0);
-// const material = new THREE.MeshStandardMaterial({ map: texture});
-// const torus = new THREE.Mesh(torusGeometry, material);
-// torus.castShadow = false;
-// torus.receiveShadow = false;
-// scene.add(torus);
+//Load background texture
+// const loader = new THREE.TextureLoader();
+textureLoader.load('./background.jpeg' , function(texture) {
+    scene.background = texture;  
+});
 
 let time = 0;
 const speed = 0.001; // Adjust the speed of the orbit
